@@ -3,6 +3,7 @@ import { Plugin } from '@/types/plugin';
 import { Filters } from '@libs/filterInputs';
 import { defaultCover } from '@libs/defaultCover';
 import { NovelStatus } from '@libs/novelStatus';
+import { storage } from '@libs/storage';
 
 type SeriesProject = {
   id: number;
@@ -49,7 +50,7 @@ class DreamyTranslationsPlugin implements Plugin.PluginBase {
   name = 'Dreamy Translations';
   icon = 'src/en/dreamyTranslations/icon.png';
   site = 'https://dreamy-translations.com';
-  version = '1.1.0';
+  version = '1.1.1';
 
   filters: Filters | undefined = undefined;
   imageRequestInit?: Plugin.ImageRequestInit | undefined = undefined;
@@ -396,7 +397,8 @@ class DreamyTranslationsPlugin implements Plugin.PluginBase {
     };
 
     // Filter locked chapters if the user enabled the setting
-    const shouldHideLocked = this.pluginSettings.hideLocked.value;
+    const raw = storage.get('hideLocked');
+    const shouldHideLocked = raw === true || raw === 'true';
 
     const chaptersToShow = shouldHideLocked
       ? data.chapters.filter(ch => ch.free)
@@ -418,7 +420,8 @@ class DreamyTranslationsPlugin implements Plugin.PluginBase {
 
     if (!data.hasAccess) {
       throw new Error(
-        'This chapter requires premium access and cannot be read here.',
+        'This chapter requires premium access and cannot be read here. ' +
+          'You can enable "Hide locked chapters" in the plugin settings to filter out locked chapters.',
       );
     }
 
